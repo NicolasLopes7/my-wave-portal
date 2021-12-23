@@ -9,5 +9,10 @@
     "chai": "^4.2.0",
     "ethereum-waffle": "^3.0.0",
     "ethers": "^5.0.0"
+  },
+  "scripts": {
+    "test": "yarn hardhat run scripts/run.js",
+    "deploy": "yarn hardhat run scripts/deploy.js",
+    "deploy:rinkeby": "yarn deploy --network rinkeby"
   }
 }

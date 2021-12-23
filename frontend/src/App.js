@@ -4,9 +4,11 @@ import './App.css';
 import { abi } from "./utils/WavePortal.json"
 
 const contractInfo = {
-  address: '0x58e206726B97E48eFC56ad563972763462b0a5fc',
+  address: '0xC71Fb5F58115481d1bBA1f70E439Dd9a050aaCEd',
   abi
 }
+
+const waveCardStyle = { backgroundColor: "OldLace", marginTop: "16px", padding: "8px" }
 
 export default function App() {
   const [currentAccount, setCurrentAccount] = useState("");
@@ -39,10 +41,14 @@ export default function App() {
   }
 
 
-  const getWavesCount = async () => {
+  const getWaves = async () => {
     const wavePortalContract = getContract()
     const waves = await wavePortalContract.getTotalWaves()
-    setWaves(waves)
+    setWaves(waves.map((wave) => ({
+      address: wave.waver,
+      timestamp: new Date(wave.timestamp * 1000),
+      message: wave.message
+    })))
   }
 
   const handleWave = async () => {
@@ -56,7 +62,7 @@ export default function App() {
       if (ethereum) {
         const wavePortalContract = getContract()
 
-        const waveTrx = await wavePortalContract.wave()
+        const waveTrx = await wavePortalContract.wave('let there be light')
         setPendingTrx(waveTrx.hash)
 
         try {
@@ -74,7 +80,7 @@ export default function App() {
 
   useEffect(() => {
     checkIfWalletIsConnected();
-    setInterval(() => getWavesCount(), 5000)
+    setInterval(() => getWaves(), 5000)
   }, [])
 
   return (
@@ -92,6 +98,14 @@ export default function App() {
         <button className="waveButton" onClick={handleWave}>
           {getInteractionButtonText()}
         </button>
+
+        {waves.map((wave) => (
+          <div key={wave.address + wave.timestamp} style={waveCardStyle}>
+            <div>Address: {wave.address}</div>
+            <div>Time: {wave.timestamp.toString()}</div>
+            <div>Message: {wave.message}</div>
+          </div>
+        ))}
       </div>
     </div>
   );
