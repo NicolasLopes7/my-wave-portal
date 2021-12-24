@@ -8,17 +8,27 @@ const contractInfo = {
   abi
 }
 
-const waveCardStyle = { backgroundColor: "OldLace", marginTop: "16px", padding: "8px" }
-
 export default function App() {
-  const [currentAccount, setCurrentAccount] = useState("");
+  const [_, setCurrentAccount] = useState("");
   const [waves, setWaves] = useState([])
   const [pendingTrx, setPendingTrx] = useState('')
+  const [message, setMessage] = useState('')
 
   const getInteractionButtonText = () => {
     if (!pendingTrx) return 'Wave at me'
     else if (pendingTrx === 'error') return 'An error occurred on process your transaction'
     else return 'Your transaction are being processed'
+  }
+
+  const castWave = (wave) => ({
+    address: wave.waver,
+    timestamp: new Date(wave.timestamp * 1000),
+    message: wave.message
+  })
+
+  const onNewWave = (wave) => {
+    const newWave = castWave(wave)
+    setWaves(prev => [newWave, ...prev])
   }
 
   const getContract = () => {
@@ -37,18 +47,27 @@ export default function App() {
     if (!ethereum) return;
 
     const accounts = await ethereum.request({ method: 'eth_accounts' });
+
+    if (accounts.length === 0) {
+      const [account] = await ethereum.request({ method: "eth_requestAccounts" })
+      setCurrentAccount(account)
+      getWaves();
+      return
+    }
+
     setCurrentAccount(accounts[0])
+    getWaves();
+    const wavePortalContract = getContract()
+
+    wavePortalContract.on('NewWave', onNewWave);
+
   }
 
 
   const getWaves = async () => {
     const wavePortalContract = getContract()
     const waves = await wavePortalContract.getTotalWaves()
-    setWaves(waves.map((wave) => ({
-      address: wave.waver,
-      timestamp: new Date(wave.timestamp * 1000),
-      message: wave.message
-    })))
+    setWaves(waves.map(castWave).reverse())
   }
 
   const handleWave = async () => {
@@ -61,8 +80,7 @@ export default function App() {
       const { ethereum } = window;
       if (ethereum) {
         const wavePortalContract = getContract()
-
-        const waveTrx = await wavePortalContract.wave('let there be light')
+        const waveTrx = await wavePortalContract.wave(message)
         setPendingTrx(waveTrx.hash)
 
         try {
@@ -77,10 +95,14 @@ export default function App() {
     }
   }
 
+  const handleMessage = (e) => setMessage(e.target.value)
 
   useEffect(() => {
     checkIfWalletIsConnected();
-    setInterval(() => getWaves(), 5000)
+    return () => {
+      const contract = getContract()
+      if (contract) contract.off('NewWave', onNewWave)
+    }
   }, [])
 
   return (
@@ -88,25 +110,36 @@ export default function App() {
 
       <div className="dataContainer">
         <div className="header">
-          👋 Hey there!
+          <span role='img'>👋</span> <span> Hey there!</span>
         </div>
 
         <div className="bio">
-          I am Nicolas and I'm studying web3! Connect your Ethereum wallet and wave at me!
+          my name is nicolas and i'm 17 years. <br />
+          currently i work as mid software engineer at <a href="https://pagar.me">pagar.me</a> a brazilian fintech!<br />
+          send some eth and wave at me below!!
         </div>
 
-        <button className="waveButton" onClick={handleWave}>
-          {getInteractionButtonText()}
-        </button>
+        <div className="message-container">
+          <input type="text" value={message} placeholder='type your message here' onChange={handleMessage} className='message-input' />
+          <button className="waveButton" onClick={handleWave}>
+            {getInteractionButtonText()}
+          </button>
+        </div>
 
         {waves.map((wave) => (
-          <div key={wave.address + wave.timestamp} style={waveCardStyle}>
-            <div>Address: {wave.address}</div>
-            <div>Time: {wave.timestamp.toString()}</div>
-            <div>Message: {wave.message}</div>
+          <div key={wave.address + wave.timestamp} className="card" >
+            <div className="card-header">
+              <span className="address">{wave.address}</span>
+            </div>
+            <div>
+              <span>Message: {wave.message}</span>
+            </div>
+            <div className="card-footer">
+              <span className="timestamp">{wave.timestamp.toLocaleString('pt-Br', { timeZone: 'America/Sao_Paulo' })}</span>
+            </div>
           </div>
         ))}
       </div>
-    </div>
+    </div >
   );
 }

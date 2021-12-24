@@ -1,3 +1,6 @@
+body {
+  font-family: 'Poppins', sans-serif;
+}
 .mainContainer {
   display: flex;
   justify-content: center;
@@ -30,5 +33,64 @@
   padding: 8px;
   border: 0;
   border-radius: 5px;
-  
+  width: 20%;
+  margin-left: 2px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  background-color: oldlace;
+  margin-top: 16px;
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.card-header {
+  position: relative;
+  top: -10px;
+  font-size: 0.7em;
+  color: rgb(144, 144, 144);
+}
+
+.card-footer {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  position: relative;
+  bottom: -10px;
+  font-size: 0.7em;
+  color: rgb(144, 144, 144);
+}
+
+.message-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  width: 100%;
+}
+
+.message-input {
+  width: 80%;
+  margin-top: 16px;
+  padding: 8px;
+  border: 1px solid #efefef;
+  border-radius: 5px;
+}
+
+.message-input::-webkit-input-placeholder {
+  font-family: 'Poppins', sans-serif;
+}
+
+.message-input:-ms-input-placeholder {
+  font-family: 'Poppins', sans-serif;
+}
+
+.message-input:-moz-placeholder {
+  font-family: 'Poppins', sans-serif;
+}
+
+.message-input::-moz-placeholder {
+  font-family: 'Poppins', sans-serif;
 }
